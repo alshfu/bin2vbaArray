@@ -409,7 +409,7 @@ hex_string = ['4d', '5a', '90', '00', '03', '00', '00', '00', '04', '00', '00', 
               '00', '00', '00',
               '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00',
               '00', '00', '00',
-              '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', ]
+              '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00']
 
 
 def file2hex_array(input_file, output_file):
@@ -430,18 +430,24 @@ def file2hex_array(input_file, output_file):
 
 def file2hex(input_file, output_file):
     with open(input_file, "rb") as fd_in, open(output_file, "wb") as fd_out:
-        fd_out.write(b"[")
-        while chunk := fd_in.read(20):
+        # fd_out.write(b"Dim myArr \n")
+        # fd_out.write(b'myArr = \n')
+        while chunk := fd_in.read(100):
             split_strings = [hexlify(chunk)[i:i + 2] for i in range(0, len(hexlify(chunk)), 2)]
-            print(hexlify(chunk))
-            print(split_strings)
+            # print(hexlify(chunk))
+            # print(split_strings)
+            # fd_out.write(b"coll.Add ")
+            fd_out.write(b"coll.Add ")
+            _string = b'"'
             for hex_var in split_strings:
-                fd_out.write(b"'")
-                fd_out.write(hex_var)
-                fd_out.write(b"',")
-            # fd_out.write(hexlify(chunk))
-            fd_out.write(b"\n")
-        fd_out.write(b"]")
+                # _string = _string + hex_var
+                _string = _string + unhexlify(hex_var) + b'|'
+                # _string = _string + hex_var
+                print(_string)
+                # fd_out.write(hex_var)
+                # fd_out.write(b",'")
+            fd_out.write(_string[:-1])
+            fd_out.write(b'"\n')
 
 
 def hex2file(input_file, output_file):
@@ -454,14 +460,17 @@ def string2file(hex_str, output_file):
     # print(hex_str)
     with open(output_file, "wb") as fd_out:
         for line in hex_str:
+            print(line)
+            print(line.rstrip())
+            print(unhexlify(line.rstrip()))
             i = 1
             fd_out.write(unhexlify(line.rstrip()))
 
 
 if __name__ == '__main__':
-    file2hex_array(f"""exe\\HelloWorld.exe""", f"""hex\\new.hex""")
+    #   file2hex_array(f"""exe\\test.exe""", f"""hex\\new.hex""")
     string2file(hex_string, f"""exe\\new_2.0.exe""")
-    file2hex(f"""exe\\HelloWorld.exe""", f"""hex\\test.hex""")
+    file2hex(f"""exe\\test.exe""", f"""hex\\test.hex""")
     #   hex2file(f"""hex\\test.hex""", f"""exe\\new.exe""")
     #   hex2file(f"""hex\\test.hex""", f"""exe\\new.exe""")
     #   hex2file(hex_string, f"""exe\\new_v2.exe""")
